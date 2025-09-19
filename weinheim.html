@@ -1,0 +1,775 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Interview Flashcards - Datenanalyst Position</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .app-container {
+      max-width: 800px;
+      width: 100%;
+      text-align: center;
+    }
+
+    .app-title {
+      color: white;
+      font-size: 2.5rem;
+      margin-bottom: 10px;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+    }
+
+    .app-subtitle {
+      color: rgba(255,255,255,0.9);
+      font-size: 1.2rem;
+      margin-bottom: 30px;
+    }
+
+    .progress-container {
+      background: rgba(255,255,255,0.2);
+      border-radius: 10px;
+      padding: 15px;
+      margin-bottom: 30px;
+      backdrop-filter: blur(10px);
+    }
+
+    .progress-bar {
+      background: rgba(255,255,255,0.3);
+      height: 8px;
+      border-radius: 4px;
+      overflow: hidden;
+      margin-bottom: 10px;
+    }
+
+    .progress-fill {
+      background: linear-gradient(90deg, #4CAF50, #45a049);
+      height: 100%;
+      border-radius: 4px;
+      transition: width 0.3s ease;
+    }
+
+    .progress-text {
+      color: white;
+      font-weight: 600;
+    }
+
+    .flashcard-container {
+      position: relative;
+      width: 100%;
+      height: 400px;
+      margin-bottom: 30px;
+      perspective: 1000px;
+    }
+
+    .flashcard {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      transition: transform 0.6s;
+      transform-style: preserve-3d;
+      cursor: pointer;
+    }
+
+    .flashcard.flipped {
+      transform: rotateY(180deg);
+    }
+
+    .card-face {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      backface-visibility: hidden;
+      border-radius: 20px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 30px;
+      overflow-y: auto;
+    }
+
+    .card-front {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+    }
+
+    .card-back {
+      background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+      color: white;
+      transform: rotateY(180deg);
+    }
+
+    .card-content {
+      text-align: left;
+      line-height: 1.6;
+      font-size: 1.1rem;
+    }
+
+    .card-label {
+      position: absolute;
+      top: 20px;
+      left: 30px;
+      font-size: 0.9rem;
+      opacity: 0.8;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .flip-hint {
+      position: absolute;
+      bottom: 20px;
+      right: 30px;
+      font-size: 0.8rem;
+      opacity: 0.7;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .controls {
+      display: flex;
+      gap: 15px;
+      justify-content: center;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .btn {
+      background: rgba(255,255,255,0.2);
+      border: 2px solid rgba(255,255,255,0.3);
+      color: white;
+      padding: 12px 24px;
+      border-radius: 25px;
+      cursor: pointer;
+      font-size: 1rem;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      backdrop-filter: blur(10px);
+      min-width: 100px;
+    }
+
+    .btn:hover {
+      background: rgba(255,255,255,0.3);
+      border-color: rgba(255,255,255,0.5);
+      transform: translateY(-2px);
+    }
+
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .btn:disabled:hover {
+      background: rgba(255,255,255,0.2);
+      border-color: rgba(255,255,255,0.3);
+      transform: none;
+    }
+
+    .card-counter {
+      background: rgba(255,255,255,0.2);
+      color: white;
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-weight: 600;
+      backdrop-filter: blur(10px);
+    }
+
+    .shuffle-container {
+      margin-top: 20px;
+    }
+
+    .shuffle-btn {
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.3);
+      font-size: 0.9rem;
+      padding: 8px 16px;
+    }
+
+    .mode-selector {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      margin-bottom: 20px;
+    }
+
+    .mode-btn {
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.3);
+      color: white;
+      padding: 8px 16px;
+      border-radius: 20px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      transition: all 0.3s ease;
+    }
+
+    .mode-btn.active {
+      background: rgba(255,255,255,0.3);
+      border-color: rgba(255,255,255,0.6);
+    }
+
+    .keyboard-hint {
+      color: rgba(255,255,255,0.7);
+      font-size: 0.8rem;
+      margin-top: 10px;
+    }
+
+    /* Custom Modal Styles */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(10px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s ease;
+    }
+
+    .modal-overlay.show {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .modal {
+      background: linear-gradient(135deg, #fff 0%, #f8f9fa 100%);
+      border-radius: 20px;
+      padding: 30px;
+      max-width: 450px;
+      width: 90%;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      transform: translateY(-20px) scale(0.95);
+      transition: all 0.3s ease;
+      text-align: center;
+      position: relative;
+    }
+
+    .modal-overlay.show .modal {
+      transform: translateY(0) scale(1);
+    }
+
+    .modal-header {
+      margin-bottom: 20px;
+    }
+
+    .modal-title {
+      color: #333;
+      font-size: 1.4rem;
+      font-weight: 700;
+      margin: 0;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .modal-body {
+      margin-bottom: 30px;
+    }
+
+    .modal-text {
+      color: #666;
+      font-size: 1rem;
+      line-height: 1.5;
+      margin: 0;
+    }
+
+    .modal-actions {
+      display: flex;
+      gap: 15px;
+      justify-content: center;
+    }
+
+    .modal-btn {
+      padding: 12px 24px;
+      border: none;
+      border-radius: 12px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      min-width: 100px;
+    }
+
+    .modal-btn-primary {
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      color: white;
+      box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+    }
+
+    .modal-btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+    }
+
+    .modal-btn-secondary {
+      background: #f8f9fa;
+      color: #666;
+      border: 2px solid #e9ecef;
+    }
+
+    .modal-btn-secondary:hover {
+      background: #e9ecef;
+      border-color: #dee2e6;
+      transform: translateY(-1px);
+    }
+
+    .modal-close {
+      position: absolute;
+      top: 15px;
+      right: 20px;
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      color: #999;
+      cursor: pointer;
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s ease;
+    }
+
+    .modal-close:hover {
+      background: #f0f0f0;
+      color: #666;
+    }
+
+    @media (max-width: 768px) {
+      .app-title {
+        font-size: 2rem;
+      }
+      
+      .flashcard-container {
+        height: 350px;
+      }
+      
+      .card-content {
+        font-size: 1rem;
+      }
+      
+      .controls {
+        flex-wrap: wrap;
+      }
+    }
+
+    .fade-in {
+      animation: fadeIn 0.5s ease-in;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-container">
+    <h1 class="app-title">Interview Flashcards</h1>
+    <p class="app-subtitle">Datenanalyst Position - Geschäftsstelle des Gutachterausschusses</p>
+    
+    <div class="progress-container">
+      <div class="progress-bar">
+        <div class="progress-fill" id="progressFill"></div>
+      </div>
+      <div class="progress-text" id="progressText">Karte 1 von 21</div>
+    </div>
+
+    <div class="mode-selector">
+      <button class="mode-btn active" id="sequentialMode">Reihenfolge</button>
+      <button class="mode-btn" id="randomMode">Zufällig</button>
+      <button class="mode-btn" id="reviewMode">Wiederholen</button>
+    </div>
+    
+    <div class="flashcard-container">
+      <div class="flashcard" id="flashcard">
+        <div class="card-face card-front">
+          <div class="card-label">Frage</div>
+          <div class="card-content" id="question">Frage wird geladen...</div>
+          <div class="flip-hint">
+            <span>Klicken zum Umdrehen</span>
+            <span>↻</span>
+          </div>
+        </div>
+        <div class="card-face card-back">
+          <div class="card-label">Antwort</div>
+          <div class="card-content" id="answer">Antwort wird geladen...</div>
+          <div class="flip-hint">
+            <span>Klicken zum Umdrehen</span>
+            <span>↻</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="controls">
+      <button class="btn" id="prevBtn">← Vorherige</button>
+      <div class="card-counter" id="cardCounter">1 / 21</div>
+      <button class="btn" id="nextBtn">Nächste →</button>
+    </div>
+
+    <div class="shuffle-container">
+      <button class="btn shuffle-btn" id="shuffleBtn">Karten mischen</button>
+    </div>
+
+    <div class="keyboard-hint">
+      Tastatur: ← → für Navigation, Leertaste zum Umdrehen
+    </div>
+  </div>
+
+  <!-- Custom Modal -->
+  <div class="modal-overlay" id="randomModeModal">
+    <div class="modal">
+      <button class="modal-close" id="modalClose">&times;</button>
+      <div class="modal-header">
+        <h3 class="modal-title">🎯 In den Zufallsmodus wechseln?</h3>
+      </div>
+      <div class="modal-body">
+        <p class="modal-text">
+          Möchten Sie die Karten mischen und in zufälliger Reihenfolge durchgehen? 
+          Dies hilft beim besseren Einprägen der Inhalte.
+        </p>
+      </div>
+      <div class="modal-actions">
+        <button class="modal-btn modal-btn-primary" id="confirmRandom">
+          Ja, mischen
+        </button>
+        <button class="modal-btn modal-btn-secondary" id="cancelRandom">
+          Abbrechen
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const flashcards = [
+      {
+        question: "Herzlich willkommen, schön, dass Sie heute hier sind. Möchten Sie sich bitte kurz vorstellen und uns sagen, warum Sie sich auf diese Stelle beworben haben?",
+        answer: "Vielen Dank für die Einladung. Mein Name ist …, ich habe ein Studium in Informatik abgeschlossen und bringe Erfahrung in der Datenanalyse, Statistik und dem Umgang mit großen Datenmengen mit. Besonders interessant finde ich die Verbindung von analytischer Arbeit mit einem gesellschaftlich relevanten Thema wie dem Immobilienmarkt. Die Aufgabe, Daten nicht nur auszuwerten, sondern auch verständlich für Politik und Öffentlichkeit aufzubereiten, motiviert mich sehr. Außerdem reizt mich die Möglichkeit, Prozesse zu digitalisieren und innovative Tools einzusetzen, um die Geschäftsstelle zukunftsfähig zu machen."
+      },
+      {
+        question: "Können Sie uns Ihre Erfahrung im Umgang mit großen Datenmengen und Datenbanken schildern?",
+        answer: "In meinen bisherigen Projekten habe ich regelmäßig mit großen Datensätzen gearbeitet – sowohl in SQL-Datenbanken als auch in Excel oder Python. Dabei habe ich Routinen zur Datenbereinigung, -validierung und -auswertung entwickelt. Mein Fokus liegt darauf, Daten so aufzubereiten, dass sie einerseits statistisch belastbar und andererseits für Entscheidungsträger gut verständlich sind."
+      },
+      {
+        question: "Wie würden Sie die Preisdatenbank mit ca. 2.000 Verträgen pro Jahr strukturiert analysieren?",
+        answer: "Ich würde zunächst ein einheitliches Schema für die Datenqualität sicherstellen – also Vollständigkeit, Plausibilität, einheitliche Formate. Danach würde ich die Daten explorativ analysieren, Kennzahlen wie Durchschnittspreise, Medianwerte oder Ausreißer identifizieren und Zeitreihenmodelle anwenden, um Trends zu erkennen. Wichtig ist auch eine klare Dokumentation, damit die Ergebnisse nachvollziehbar bleiben."
+      },
+      {
+        question: "Welche Tools und Programmiersprachen nutzen Sie am liebsten?",
+        answer: "Für komplexere Analysen nutze ich Python (Pandas, NumPy, Matplotlib, scikit-learn). Für statistische Modellierung und Reports verwende ich auch gerne R. SQL ist für mich Standard, um Daten effizient zu managen. Zur Visualisierung finde ich Power BI oder ggplot in R sehr hilfreich, je nach Zielgruppe."
+      },
+      {
+        question: "Haben Sie Erfahrung in der Immobilienbewertung?",
+        answer: "Direkt in der Wertermittlung habe ich bisher begrenzte Erfahrung, aber ich kenne die Grundlagen – etwa die Bedeutung von Bodenrichtwerten oder Vergleichsfaktoren. Mein Vorteil ist, dass ich komplexe statistische Modelle schnell auf neue Domänen übertragen kann. Zudem bin ich bereit, mich gezielt in Wertermittlungsrecht und Immobilienbewertung einzuarbeiten."
+      },
+      {
+        question: "Wie würden Sie die Qualität und Plausibilität der Daten sicherstellen?",
+        answer: "Ich würde Prüfmechanismen einbauen, z. B. Grenzwerte, Dublettenprüfungen oder Plausibilitätsregeln. Außerdem würde ich automatisierte Skripte nutzen, um inkonsistente Einträge zu erkennen. Wichtig ist auch ein enger Austausch mit den Kolleg*innen, die die Daten erfassen."
+      },
+      {
+        question: "Wie würden Sie den Immobilienmarktbericht gestalten?",
+        answer: "Mein Ansatz wäre ein Mix aus klaren Visualisierungen, aussagekräftigen Kennzahlen und gut verständlichen Erläuterungen. Neben klassischen Tabellen würde ich interaktive Grafiken oder Karten einsetzen, um Entwicklungen transparent darzustellen. Dabei ist mir wichtig, die Sprache so zu wählen, dass auch Laien die Ergebnisse nachvollziehen können."
+      },
+      {
+        question: "Welche Visualisierungsmethoden nutzen Sie?",
+        answer: "Für interne Fachauswertungen eher detaillierte Diagramme, Boxplots oder Heatmaps. Für die Öffentlichkeit eher leicht verständliche Balken- oder Liniendiagramme, ergänzt durch Karten für Bodenrichtwerte. Entscheidend ist, die Visualisierung an die Zielgruppe anzupassen."
+      },
+      {
+        question: "Wie gehen Sie mit widersprüchlichen oder unvollständigen Daten um?",
+        answer: "Ich dokumentiere die Unstimmigkeiten, prüfe, ob sie durch externe Quellen ergänzt werden können, und markiere ggf. Annahmen oder Unsicherheiten. Wichtig ist, transparent zu machen, wie diese Entscheidungen die Ergebnisse beeinflussen."
+      },
+      {
+        question: "Können Sie ein Beispiel nennen, wo Sie einen Prozess datenbasiert verbessert haben?",
+        answer: "In meinem letzten Projekt habe ich ein automatisiertes Reporting aufgesetzt, das früher manuell erstellt wurde. Dadurch konnten Fehler reduziert und pro Woche mehrere Stunden Arbeitszeit eingespart werden."
+      },
+      {
+        question: "Wie sehen Sie den Einsatz von KI-Tools?",
+        answer: "Ich halte KI für ein wertvolles Werkzeug, um Muster schneller zu erkennen, Prognosen zu verbessern oder Routineaufgaben zu automatisieren. Gleichzeitig sollte man immer die Nachvollziehbarkeit im Blick behalten, gerade im öffentlichen Dienst. KI ist für mich ein ergänzendes Instrument, kein Ersatz für fachliche Kompetenz."
+      },
+      {
+        question: "Wie würden Sie komplexe Sachverhalte für Laien erklären?",
+        answer: "Ich benutze anschauliche Beispiele, vermeide Fachjargon und arbeite mit Visualisierungen. Zum Beispiel würde ich Preisentwicklungen nicht mit Regressionskoeffizienten erklären, sondern anhand eines einfachen Diagramms mit der Botschaft ‚Die Preise sind in den letzten fünf Jahren um X Prozent gestiegen'."
+      },
+      {
+        question: "Beschreiben Sie Ihre Arbeitsweise.",
+        answer: "Ich arbeite sehr strukturiert, beginne mit einer klaren Planung, unterteile Aufgaben in Schritte und dokumentiere Ergebnisse sorgfältig. Gleichzeitig bin ich flexibel genug, wenn neue Anforderungen auftauchen."
+      },
+      {
+        question: "Was motiviert Sie an der Tätigkeit im öffentlichen Dienst?",
+        answer: "Mich motiviert die Möglichkeit, mit meiner Arbeit einen direkten Beitrag für die Gesellschaft zu leisten – in diesem Fall Transparenz und Verlässlichkeit auf dem Immobilienmarkt. Außerdem schätze ich die langfristige Perspektive und die Teamarbeit."
+      },
+      {
+        question: "Wie behalten Sie bei mehreren Projekten den Überblick?",
+        answer: "Ich priorisiere Aufgaben nach Dringlichkeit und Wirkung, nutze digitale Tools wie Trello oder Outlook und setze mir klare Deadlines. Außerdem kommuniziere ich frühzeitig, falls sich Engpässe abzeichnen."
+      },
+      {
+        question: "Wie gehen Sie mit Termindruck um?",
+        answer: "Ich bleibe ruhig, strukturiere die Arbeit noch klarer und konzentriere mich auf die wesentlichen Punkte. Bei Bedarf suche ich aktiv Unterstützung im Team, anstatt alles allein lösen zu wollen."
+      },
+      {
+        question: "Was erwarten Sie an Unterstützung?",
+        answer: "Mir ist wichtig, dass klare Ziele und Prioritäten vorgegeben werden. Gleichzeitig wünsche ich mir einen offenen Austausch im Team und Möglichkeiten zur Weiterbildung."
+      },
+      {
+        question: "Können Sie sich vorstellen, Ergebnisse auch vor der Öffentlichkeit zu präsentieren?",
+        answer: "Ja, definitiv. Ich habe Erfahrung darin, Ergebnisse vor Fach- und Nicht-Fachpublikum zu präsentieren und lege Wert auf klare, verständliche Kommunikation."
+      },
+      {
+        question: "In welcher Entgeltgruppe sehen Sie sich?",
+        answer: "Aufgrund meiner Qualifikation und Erfahrung halte ich eine Eingruppierung in E11 oder E12 für angemessen. Natürlich orientiere ich mich dabei an den tariflichen Regelungen."
+      },
+      {
+        question: "Sind Sie bereit, sich in Wertermittlungsrecht einzuarbeiten?",
+        answer: "Ja, auf jeden Fall. Ich sehe das als eine spannende Möglichkeit, mein Fachwissen zu erweitern."
+      },
+      {
+        question: "Wie stehen Sie zu Homeoffice?",
+        answer: "Ich finde eine Mischung ideal. Für konzentrierte Analysen nutze ich gerne Homeoffice, für Abstimmungen und Teamarbeit bin ich gerne vor Ort."
+      }
+    ];
+
+    let currentCard = 0;
+    let currentMode = 'sequential';
+    let shuffledIndices = [];
+    let reviewCards = [];
+
+    // DOM elements
+    const flashcard = document.getElementById('flashcard');
+    const questionEl = document.getElementById('question');
+    const answerEl = document.getElementById('answer');
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    const cardCounter = document.getElementById('cardCounter');
+    const progressFill = document.getElementById('progressFill');
+    const progressText = document.getElementById('progressText');
+    const shuffleBtn = document.getElementById('shuffleBtn');
+    const sequentialMode = document.getElementById('sequentialMode');
+    const randomMode = document.getElementById('randomMode');
+    const reviewModeBtn = document.getElementById('reviewMode');
+    
+    // Modal elements
+    const randomModeModal = document.getElementById('randomModeModal');
+    const modalClose = document.getElementById('modalClose');
+    const confirmRandom = document.getElementById('confirmRandom');
+    const cancelRandom = document.getElementById('cancelRandom');
+
+    function showModal() {
+      randomModeModal.classList.add('show');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function hideModal() {
+      randomModeModal.classList.remove('show');
+      document.body.style.overflow = 'auto';
+    }
+
+    function initializeApp() {
+      shuffledIndices = Array.from({length: flashcards.length}, (_, i) => i);
+      updateCard();
+      updateButtons();
+      updateProgress();
+    }
+
+    function getCurrentCardIndex() {
+      switch(currentMode) {
+        case 'random':
+          return shuffledIndices[currentCard];
+        case 'review':
+          return reviewCards[currentCard] || 0;
+        default:
+          return currentCard;
+      }
+    }
+
+    function getTotalCards() {
+      return currentMode === 'review' ? reviewCards.length : flashcards.length;
+    }
+
+    function updateCard() {
+      const cardIndex = getCurrentCardIndex();
+      const card = flashcards[cardIndex];
+      
+      flashcard.classList.remove('flipped');
+      questionEl.textContent = card.question;
+      answerEl.textContent = card.answer;
+      
+      // Add fade animation
+      flashcard.classList.remove('fade-in');
+      setTimeout(() => flashcard.classList.add('fade-in'), 10);
+    }
+
+    function updateButtons() {
+      const totalCards = getTotalCards();
+      prevBtn.disabled = currentCard === 0;
+      nextBtn.disabled = currentCard === totalCards - 1;
+    }
+
+    function updateProgress() {
+      const totalCards = getTotalCards();
+      const progressPercent = ((currentCard + 1) / totalCards) * 100;
+      progressFill.style.width = `${progressPercent}%`;
+      progressText.textContent = `Karte ${currentCard + 1} von ${totalCards}`;
+      cardCounter.textContent = `${currentCard + 1} / ${totalCards}`;
+    }
+
+    function shuffleArray(array) {
+      const shuffled = [...array];
+      for (let i = shuffled.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+      }
+      return shuffled;
+    }
+
+    function setMode(mode) {
+      currentMode = mode;
+      currentCard = 0;
+      
+      // Update mode buttons
+      document.querySelectorAll('.mode-btn').forEach(btn => btn.classList.remove('active'));
+      
+      switch(mode) {
+        case 'sequential':
+          sequentialMode.classList.add('active');
+          break;
+        case 'random':
+          randomMode.classList.add('active');
+          shuffledIndices = shuffleArray(Array.from({length: flashcards.length}, (_, i) => i));
+          break;
+        case 'review':
+          reviewModeBtn.classList.add('active');
+          if (reviewCards.length === 0) {
+            // Add some random cards for review
+            reviewCards = shuffleArray(Array.from({length: Math.min(5, flashcards.length)}, (_, i) => i));
+          }
+          break;
+      }
+      
+      updateCard();
+      updateButtons();
+      updateProgress();
+    }
+
+    function addToReview() {
+      const cardIndex = getCurrentCardIndex();
+      if (!reviewCards.includes(cardIndex)) {
+        reviewCards.push(cardIndex);
+      }
+    }
+
+    // Event listeners
+    flashcard.addEventListener('click', () => {
+      flashcard.classList.toggle('flipped');
+    });
+
+    prevBtn.addEventListener('click', () => {
+      if (currentCard > 0) {
+        currentCard--;
+        updateCard();
+        updateButtons();
+        updateProgress();
+      }
+    });
+
+    nextBtn.addEventListener('click', () => {
+      const totalCards = getTotalCards();
+      if (currentCard < totalCards - 1) {
+        currentCard++;
+        updateCard();
+        updateButtons();
+        updateProgress();
+      }
+    });
+
+    shuffleBtn.addEventListener('click', () => {
+      if (currentMode === 'random') {
+        setMode('random');
+      } else {
+        showModal();
+      }
+    });
+
+    sequentialMode.addEventListener('click', () => setMode('sequential'));
+    randomMode.addEventListener('click', () => setMode('random'));
+    reviewModeBtn.addEventListener('click', () => setMode('review'));
+
+    // Modal event listeners
+    modalClose.addEventListener('click', hideModal);
+    cancelRandom.addEventListener('click', hideModal);
+    confirmRandom.addEventListener('click', () => {
+      hideModal();
+      setMode('random');
+    });
+
+    // Close modal when clicking outside
+    randomModeModal.addEventListener('click', (e) => {
+      if (e.target === randomModeModal) {
+        hideModal();
+      }
+    });
+
+    // Keyboard navigation
+    document.addEventListener('keydown', (e) => {
+      // Don't handle keyboard events when modal is open
+      if (randomModeModal.classList.contains('show')) {
+        if (e.key === 'Escape') {
+          hideModal();
+        }
+        return;
+      }
+
+      switch(e.key) {
+        case 'ArrowLeft':
+          if (!prevBtn.disabled) {
+            prevBtn.click();
+          }
+          break;
+        case 'ArrowRight':
+          if (!nextBtn.disabled) {
+            nextBtn.click();
+          }
+          break;
+        case ' ':
+          e.preventDefault();
+          flashcard.click();
+          break;
+        case 'r':
+          addToReview();
+          break;
+        case 'Escape':
+          hideModal();
+          break;
+      }
+    });
+
+    // Initialize the app
+    initializeApp();
+  </script>
+</body>
+</html>
